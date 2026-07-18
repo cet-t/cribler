@@ -1,0 +1,25 @@
+[package]
+name = "cribler_core"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["cet"]
+description = "Core statistical randomness-test engines (closure-based, RNG-library-agnostic). Extend via cribler."
+repository = "https://github.com/cet-t/cribler"
+keywords = ["random", "rng", "statistics", "testing", "randomness"]
+categories = ["algorithms", "science", "development-tools::testing"]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[dependencies]
+thiserror = "2"
+serde = { version = "1", optional = true, features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"
+
+[features]
+serde = ["dep:serde"]
