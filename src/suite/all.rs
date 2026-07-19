@@ -184,7 +184,7 @@ impl<'a> Suite<'a> {
         let mut birthday = self.birthday.run()?;
         let mut nist = self.nist.run()?;
 
-        let names: Vec<String> = chisq.keys().cloned().collect();
+        let names: Vec<_> = chisq.keys().cloned().collect();
         let mut out = HashMap::with_capacity(names.len());
         for name in names {
             let result = SuiteResult {

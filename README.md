@@ -19,16 +19,16 @@ that.
 
 ## Engines
 
-| Engine | What it detects |
-|---|---|
-| Chi-squared (`ChiSq`) | Uniformity of the output distribution |
-| Monte Carlo pi (`McPi`) | 2D uniformity sanity check via pi estimation |
-| Serial (`Serial`) | Correlation between consecutive outputs (multi-dimensional chi-squared) |
-| Runs (`Runs`) | Sequential correlation via monotonic run lengths |
-| Kolmogorov-Smirnov (`Ks`) | Deviation of the empirical CDF from the ideal uniform CDF |
-| Birthday spacing (`Birthday`) | Short periods / lattice structure (Marsaglia's DIEHARD test) |
-| NIST SP 800-22 (`Nist`) | Frequency, Block Frequency, Runs, Longest-Run-of-Ones, Cumulative Sums (bit-level subset) |
-| Paranoid (`Paranoid`) | Elevates any single test into a battery-level test (NIST SP 800-22 §4.2) |
+| Engine                        | What it detects                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| Chi-squared (`ChiSq`)         | Uniformity of the output distribution                                                     |
+| Monte Carlo pi (`McPi`)       | 2D uniformity sanity check via pi estimation                                              |
+| Serial (`Serial`)             | Correlation between consecutive outputs (multi-dimensional chi-squared)                   |
+| Runs (`Runs`)                 | Sequential correlation via monotonic run lengths                                          |
+| Kolmogorov-Smirnov (`Ks`)     | Deviation of the empirical CDF from the ideal uniform CDF                                 |
+| Birthday spacing (`Birthday`) | Short periods / lattice structure (Marsaglia's DIEHARD test)                              |
+| NIST SP 800-22 (`Nist`)       | Frequency, Block Frequency, Runs, Longest-Run-of-Ones, Cumulative Sums (bit-level subset) |
+| Paranoid (`Paranoid`)         | Elevates any single test into a battery-level test (NIST SP 800-22 §4.2)                  |
 
 ## Quick start
 

@@ -1,6 +1,6 @@
 [package]
 name = "cribler"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 authors = ["cet"]
@@ -15,27 +15,27 @@ lto = "fat"
 codegen-units = 1
 
 [dependencies]
-cribler_core = { path = "cribler_core", version = "0.1.0" }
+cribler_core = "0.1.0"
 rand_core = { version = "0.10", optional = true }
-urng = { version = "0.9", optional = true }
-paste = { version = "1", optional = true }
-hashbrown = { version = "0.17", features = ["serde"] }
-thiserror = "2"
-serde = { version = "1", optional = true, features = ["derive"] }
+urng = { version = "0.10.1", optional = true }
+pastey = { version = "0.2.3", optional = true }
+hashbrown = { version = "0.17.1", features = ["serde"] }
+thiserror = "2.0.19"
+serde = { version = "1.0.229", optional = true, features = ["derive"] }
 
 [dev-dependencies]
 rand = { version = "0.10", default-features = false, features = ["std_rng"] }
 rand_core = "0.10"
-urng = "0.9"
-anyhow = "1"
-rand_sfc = "0.2"
+urng = "0.10.1"
+anyhow = "1.0.104"
+rand_sfc = "0.2.0"
 serde_json = "1.0"
 
 [features]
 rand = ["dep:rand_core"]
-urng = ["dep:urng", "dep:paste"]
+urng = ["dep:urng", "dep:pastey"]
 serde = ["dep:serde", "cribler_core/serde"]
 
 [[example]]
 name = "test"
-required-features = ["rand", "urng"]
+required-features = ["rand", "urng", "serde"]

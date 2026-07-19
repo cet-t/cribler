@@ -13,11 +13,19 @@ pub mod suite;
 #[cfg(feature = "urng")]
 pub mod urng_support;
 
-/// The unqualified type name of `T`, e.g. `"Sfc32"` for `urng::Sfc32`. Used to
-/// auto-name cases registered via `Suite::from_urng32`/`from_urng64`/`from_rand`.
+/// The crate-qualified type name of `T`, e.g. `"urng::Sfc32"` for
+/// `urng::rng::Sfc32`. Used to auto-name cases registered via
+/// `Suite::from_urng32`/`from_urng64`/`from_rand`; including the crate name
+/// keeps identically-named types from different crates (e.g. `urng::Sfc32`
+/// vs. `rand_sfc::Sfc32`) from colliding as case keys.
+#[allow(unused)]
 pub(crate) fn short_type_name<T>() -> String {
     let full = std::any::type_name::<T>();
-    full.rsplit("::").next().unwrap_or(full).to_string()
+    let type_name = full.rsplit("::").next().unwrap_or(full);
+    match full.split_once("::") {
+        Some((krate, _)) if krate != type_name => format!("{krate}::{type_name}"),
+        _ => type_name.to_string(),
+    }
 }
 
 pub use cribler_core::*;

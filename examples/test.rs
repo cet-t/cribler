@@ -14,11 +14,9 @@ impl<'a> From<Tiny64> for WordSource<'a> {
 
 fn main() -> anyhow::Result<()> {
     let results = Suite::new(1)
-        .from_urng32::<urng::Xorshift32>()?
-        .from_urng32::<urng::Pcg32>()?
-        .from_urng32::<urng::SplitMix32>()?
-        .from_rand::<rand_sfc::Sfc32>()?
         .from_custom(Tiny64(1))?
+        .from_urng32::<urng::Sfc32>()?
+        .from_rand::<rand_sfc::Sfc32>()?
         .run()?;
 
     for r in &results {
