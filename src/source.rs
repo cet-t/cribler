@@ -37,12 +37,12 @@
 //! assert!(results.contains_key("MyRng"));
 //! ```
 //!
-//! [`UrngSeed32`]/[`UrngSeed64`] aren't implemented generically for every
-//! `urng::Rng32`/`Rng64` (there's no common seeding trait to hang a blanket
-//! impl off — each generator has its own inherent `new(seed)`), so they're
-//! implemented explicitly for the common generators re-exported at
-//! `urng`'s crate root. Implement either trait yourself to seed a generator
-//! `from_urng32`/`from_urng64` doesn't already know about.
+//! [`UrngSeed32`]/[`UrngSeed64`] are blanket-implemented for every
+//! `urng::Rng32`/`Rng64` that also implements `urng::Seed32`/`Seed64`
+//! (construction goes through `urng::Seed32::from_seed`/`Seed64::from_seed`),
+//! mirroring how [`RandSource`] is blanket-implemented for every
+//! `rand_core::Rng`. Any generator carrying those `urng` traits works with
+//! `from_urng32`/`from_urng64` out of the box.
 
 /// A named raw-word sampler, ready to be registered on a `Suite` via
 /// `.from_custom(source)`, where `source: impl Into<WordSource>`. `word_bits`
@@ -65,57 +65,34 @@ impl<'a> WordSource<'a> {
 }
 
 /// A `urng::Rng32` that `Suite::from_urng32` knows how to build from a `u32`
-/// seed (feature `urng`).
+/// seed (feature `urng`). Blanket-implemented for every `urng::Rng32` that is
+/// also `urng::Seed32`.
 #[cfg(feature = "urng")]
 pub trait UrngSeed32: urng::Rng32 + Sized {
     fn from_seed(seed: u32) -> Self;
 }
 
 /// A `urng::Rng64` that `Suite::from_urng64` knows how to build from a `u64`
-/// seed (feature `urng`).
+/// seed (feature `urng`). Blanket-implemented for every `urng::Rng64` that is
+/// also `urng::Seed64`.
 #[cfg(feature = "urng")]
 pub trait UrngSeed64: urng::Rng64 + Sized {
     fn from_seed(seed: u64) -> Self;
 }
 
 #[cfg(feature = "urng")]
-macro_rules! impl_urng_seed32 {
-    ($($t:ty),* $(,)?) => {
-        $(
-            impl UrngSeed32 for $t {
-                fn from_seed(seed: u32) -> Self {
-                    Self::new(seed)
-                }
-            }
-        )*
-    };
-}
-
-#[cfg(feature = "urng")]
-macro_rules! impl_urng_seed64 {
-    ($($t:ty),* $(,)?) => {
-        $(
-            impl UrngSeed64 for $t {
-                fn from_seed(seed: u64) -> Self {
-                    Self::new(seed)
-                }
-            }
-        )*
-    };
-}
-
-#[cfg(feature = "urng")]
-impl_urng_seed32!(urng::Jsf32, urng::Sfc32, urng::SplitMix32, urng::Xorshift32);
-
-#[cfg(feature = "urng")]
-impl UrngSeed32 for urng::Pcg32 {
+impl<R: urng::Rng32 + urng::Seed32> UrngSeed32 for R {
     fn from_seed(seed: u32) -> Self {
-        Self::new(seed as u64)
+        <Self as urng::Seed32>::from_seed(seed)
     }
 }
 
 #[cfg(feature = "urng")]
-impl_urng_seed64!(urng::Sfc64, urng::SplitMix64, urng::Xorshift64);
+impl<R: urng::Rng64 + urng::Seed64> UrngSeed64 for R {
+    fn from_seed(seed: u64) -> Self {
+        <Self as urng::Seed64>::from_seed(seed)
+    }
+}
 
 /// A `rand_core::Rng` that `Suite::from_rand` samples from (feature `rand`).
 /// Implemented for every `rand_core::Rng`; construction goes through

@@ -1,6 +1,6 @@
 [package]
 name = "cribler"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 license = "MIT"
 authors = ["cet"]
@@ -17,7 +17,7 @@ codegen-units = 1
 [dependencies]
 cribler_core = "0.1.0"
 rand_core = { version = "0.10", optional = true }
-urng = { version = "0.10.1", optional = true }
+urng = { version = "0.11.0", optional = true }
 pastey = { version = "0.2.3", optional = true }
 hashbrown = { version = "0.17.1", features = ["serde"] }
 thiserror = "2.0.19"
@@ -26,9 +26,10 @@ serde = { version = "1.0.229", optional = true, features = ["derive"] }
 [dev-dependencies]
 rand = { version = "0.10", default-features = false, features = ["std_rng"] }
 rand_core = "0.10"
-urng = "0.10.1"
+urng = "0.11.0"
 anyhow = "1.0.104"
 rand_sfc = "0.2.0"
+biski64 = "0.3.2"
 serde_json = "1.0"
 
 [features]

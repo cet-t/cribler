@@ -16,6 +16,7 @@ fn main() -> anyhow::Result<()> {
     let results = Suite::new(1)
         .from_custom(Tiny64(1))?
         .from_urng32::<urng::Sfc32>()?
+        .from_urng64::<urng::Biski64>()?
         .from_rand::<rand_sfc::Sfc32>()?
         .run()?;
 

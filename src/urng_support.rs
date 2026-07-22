@@ -20,7 +20,7 @@
 //! (via this optional `urng` feature) to provide the same ergonomics `urng`
 //! used to bundle itself.
 
-use urng::{Rng32, Rng64};
+use urng::{Rng32, Rng64, Seed32, Seed64};
 
 use crate::{
     BirthdayConfig, BirthdayError, BirthdayResult, ChiSqConfig, ChiSqError, ChiSqResult, KsConfig,
@@ -33,7 +33,7 @@ use crate::{
 /// Adds `run_chisq`/`run_mcpi`/`run_serial`/`run_runs`/`run_ks`/`run_birthday`/
 /// `run_nist` directly to any `urng::Rng32`, so `rng.run_chisq("name")` works
 /// without going through a `Suite` at all.
-pub trait Test32: Rng32 + Sized {
+pub trait Test32: Rng32 + Seed32 + Sized {
     fn run_chisq(&mut self, name: impl Into<String>) -> Result<ChiSqResult, ChiSqError> {
         let mut sampler = || unit_f64_from_u32(self.nextu());
         run_chisq(name, &mut sampler, ChiSqConfig::default())
@@ -70,12 +70,12 @@ pub trait Test32: Rng32 + Sized {
     }
 }
 
-impl<T: Rng32> Test32 for T {}
+impl<T: Rng32 + Seed32> Test32 for T {}
 
 /// Adds `run_chisq`/`run_mcpi`/`run_serial`/`run_runs`/`run_ks`/`run_birthday`/
 /// `run_nist` directly to any `urng::Rng64`, so `rng.run_chisq("name")` works
 /// without going through a `Suite` at all.
-pub trait Test64: Rng64 + Sized {
+pub trait Test64: Rng64 + Seed64 + Sized {
     fn run_chisq(&mut self, name: impl Into<String>) -> Result<ChiSqResult, ChiSqError> {
         let mut sampler = || unit_f64_from_u64(self.nextu());
         run_chisq(name, &mut sampler, ChiSqConfig::default())
@@ -112,7 +112,7 @@ pub trait Test64: Rng64 + Sized {
     }
 }
 
-impl<T: Rng64> Test64 for T {}
+impl<T: Rng64 + Seed64> Test64 for T {}
 
 #[cfg(test)]
 mod tests {
