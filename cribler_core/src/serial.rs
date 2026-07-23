@@ -3,6 +3,8 @@
 
 use thiserror::Error;
 
+use crate::verdict::Verdict;
+
 /// Configuration for a serial (multi-dimensional uniformity) test.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -61,16 +63,6 @@ impl SerialConfig {
     }
 }
 
-/// Outcome of a single serial test run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum SerialVerdict {
-    /// The observed z-score was within the configured limit.
-    Pass,
-    /// The observed z-score exceeded the configured limit.
-    Fail,
-}
-
 /// Full result of a single serial test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -92,7 +84,7 @@ pub struct SerialResult {
     /// z-score threshold used for the verdict.
     pub z_limit: f64,
     /// Final pass/fail verdict.
-    pub verdict: SerialVerdict,
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a serial test.
@@ -177,8 +169,7 @@ fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), Serial
 /// Draws `config.tuples` overlapping `config.dim`-tuples of consecutive
 /// samples, bins them into a `config.dim`-dimensional histogram of
 /// `config.bins_per_axis` cells per axis, computes the chi-squared statistic
-/// and its normalized z-score, and returns a [`SerialResult`] carrying the
-/// [`SerialVerdict`].
+/// and its normalized z-score, and returns a [`SerialResult`] carrying the [`Verdict`].
 pub fn run_serial(
     name: impl Into<String>,
     sampler: &mut dyn FnMut() -> f64,
@@ -219,9 +210,9 @@ pub fn run_serial(
     let df = (total_bins - 1) as f64;
     let z_score = (chi2 - df) / (2.0 * df).sqrt();
     let verdict = if z_score.abs() <= config.z_limit {
-        SerialVerdict::Pass
+        Verdict::Pass
     } else {
-        SerialVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(SerialResult {

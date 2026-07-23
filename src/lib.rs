@@ -5,6 +5,7 @@
 //! * [`source`]: [`source::WordSource`] (used by `from_custom` — integer-based, never float) and the [`source::UrngSeed32`]/[`source::UrngSeed64`]/[`source::RandSource`] traits that back `from_urng32`/`from_urng64`/`from_rand`.
 //! * [`urng_support`] (feature `urng`): adds [`urng_support::Test32`]/[`urng_support::Test64`] (`rng.run_chisq(name)`, ...) directly to any `urng::Rng32`/`Rng64` generator.
 
+pub mod macros;
 pub mod paranoid_suite;
 #[cfg(feature = "rand")]
 pub mod rand_support;

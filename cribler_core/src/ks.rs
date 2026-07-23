@@ -3,6 +3,8 @@
 
 use thiserror::Error;
 
+use crate::verdict::Verdict;
+
 /// Configuration for a Kolmogorov-Smirnov uniformity test.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -46,16 +48,6 @@ impl KsConfig {
     }
 }
 
-/// Outcome of a single Kolmogorov-Smirnov test run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum KsVerdict {
-    /// The observed KS statistic was within the critical value.
-    Pass,
-    /// The observed KS statistic exceeded the critical value.
-    Fail,
-}
-
 /// Full result of a single Kolmogorov-Smirnov test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -71,7 +63,7 @@ pub struct KsResult {
     /// Significance level used for the verdict.
     pub alpha: f64,
     /// Final pass/fail verdict.
-    pub verdict: KsVerdict,
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a KS test.
@@ -173,9 +165,9 @@ pub fn run_ks(
 
     let critical_value = config.critical_value();
     let verdict = if d_statistic <= critical_value {
-        KsVerdict::Pass
+        Verdict::Pass
     } else {
-        KsVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(KsResult {

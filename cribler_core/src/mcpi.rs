@@ -1,7 +1,10 @@
 //! Monte Carlo pi-estimation test engine.
 
 use std::f64;
+
 use thiserror::Error;
+
+use crate::verdict::Verdict;
 
 /// Configuration for a Monte Carlo pi-estimation test.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -38,16 +41,6 @@ impl McPiConfig {
     }
 }
 
-/// Outcome of a single Monte Carlo pi-estimation test run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum McPiVerdict {
-    /// The estimated pi was within `max_error_pct` of the true value.
-    Pass,
-    /// The estimated pi deviated too far from the true value.
-    Fail,
-}
-
 /// Full result of a single Monte Carlo pi-estimation test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -67,7 +60,7 @@ pub struct McPiResult {
     /// Relative-error threshold used for the verdict.
     pub max_error_pct: f64,
     /// Final pass/fail verdict.
-    pub verdict: McPiVerdict,
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a Monte Carlo pi test.
@@ -149,7 +142,7 @@ fn validate_sample(
 /// Samples `config.pairs` points uniformly in `[0, 1)^2` (two draws from
 /// `sampler` per point), counts how many fall inside the unit quarter-circle,
 /// estimates pi as `4 * inside / pairs`, and returns a [`McPiResult`]
-/// carrying the [`McPiVerdict`].
+/// carrying the [`Verdict`].
 pub fn run_mcpi(
     name: impl Into<String>,
     sampler: &mut dyn FnMut() -> f64,
@@ -173,9 +166,9 @@ pub fn run_mcpi(
     let absolute_error = (pi_estimate - f64::consts::PI).abs();
     let error_pct = (absolute_error / f64::consts::PI) * 100.0;
     let verdict = if error_pct <= config.max_error_pct {
-        McPiVerdict::Pass
+        Verdict::Pass
     } else {
-        McPiVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(McPiResult {

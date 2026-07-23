@@ -24,15 +24,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
-name = "biski64"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edac6861ccc0a838d8851bd557be3a3821185b49816f50c11ade7cf8c83afe7e"
-dependencies = [
- "rand_core 0.9.5",
-]
-
-[[package]]
 name = "bytemuck"
 version = "1.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -66,7 +57,7 @@ checksum = "d524456ba66e72eb8b115ff89e01e497f8e6d11d78b70b1aa13c0fbd97540a81"
 dependencies = [
  "cfg-if",
  "cpufeatures",
- "rand_core 0.10.1",
+ "rand_core",
 ]
 
 [[package]]
@@ -83,12 +74,11 @@ name = "cribler"
 version = "0.2.0"
 dependencies = [
  "anyhow",
- "biski64",
  "cribler_core",
  "hashbrown",
  "pastey",
  "rand",
- "rand_core 0.10.1",
+ "rand_core",
  "rand_sfc",
  "serde",
  "serde_json",
@@ -98,9 +88,9 @@ dependencies = [
 
 [[package]]
 name = "cribler_core"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03bce5f441da8360514a5f27633b88b3ead6dffdc805eb8f3e0a2ff256494e5c"
+checksum = "d08fa9cadb7ea1a7b42b3ae8516962f44ff6131bd4a5f3e88c2944673d114c0d"
 dependencies = [
  "serde",
  "thiserror",
@@ -196,14 +186,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7f5fa3a058cd35567ef9bfa5e75732bee0f9e4c55fa90477bef2dfcdbc4be80"
 dependencies = [
  "chacha20",
- "rand_core 0.10.1",
+ "rand_core",
 ]
-
-[[package]]
-name = "rand_core"
-version = "0.9.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76afc826de14238e6e8c374ddcc1fa19e374fd8dd986b0d2af0d02377261d83c"
 
 [[package]]
 name = "rand_core"
@@ -217,7 +201,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a429a4b60b543f61ddd5a55f31d39a2ece77617cb40bf83ceedef1c3e6e514a9"
 dependencies = [
- "rand_core 0.10.1",
+ "rand_core",
 ]
 
 [[package]]

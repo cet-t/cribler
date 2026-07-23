@@ -4,6 +4,8 @@
 
 use thiserror::Error;
 
+use crate::verdict::Verdict;
+
 /// Configuration for a birthday spacing test.
 ///
 /// Places `points` "birthdays" into a space of `2^bits_per_axis` possible
@@ -69,16 +71,6 @@ impl BirthdayConfig {
     }
 }
 
-/// Outcome of a single birthday spacing test run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum BirthdayVerdict {
-    /// The observed z-score was within the configured limit.
-    Pass,
-    /// The observed z-score exceeded the configured limit.
-    Fail,
-}
-
 /// Full result of a single birthday spacing test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -96,7 +88,7 @@ pub struct BirthdayResult {
     /// z-score threshold used for the verdict.
     pub z_limit: f64,
     /// Final pass/fail verdict.
-    pub verdict: BirthdayVerdict,
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a birthday spacing test.
@@ -182,9 +174,9 @@ pub fn run_birthday(
     let variance = expected_collisions.max(f64::EPSILON);
     let z_score = (collisions as f64 - expected_collisions) / variance.sqrt();
     let verdict = if z_score.abs() <= config.z_limit {
-        BirthdayVerdict::Pass
+        Verdict::Pass
     } else {
-        BirthdayVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(BirthdayResult {

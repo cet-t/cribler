@@ -20,6 +20,7 @@ pub mod paranoid;
 pub mod runs;
 pub mod serial;
 pub mod units;
+pub mod verdict;
 
 pub use birthday::*;
 pub use chisq::*;
@@ -31,3 +32,4 @@ pub use paranoid::*;
 pub use runs::*;
 pub use serial::*;
 pub use units::*;
+pub use verdict::*;

@@ -23,8 +23,8 @@ pub struct SuiteResult {
     pub nist: NistResult,
 }
 
-/// Aggregated results from a [`Suite`] run: one [`SuiteResult`] (all seven
-/// engines) per registered generator, keyed by its case name.
+/// Aggregated results from a [`Suite`] run: one [`SuiteResult`] (all seven engines)
+/// per registered generator, keyed by its case name.
 pub type SuiteResults = HashMap<String, SuiteResult>;
 
 /// An error from any single engine while building or running a [`Suite`].
@@ -44,12 +44,15 @@ pub enum SuiteError {
     Birthday(#[from] BirthdayError),
     #[error("nist: {0}")]
     Nist(#[from] NistError),
+    #[error("{0}")]
+    Other(&'static str),
 }
 
 /// Runs every engine over the same generator(s) as one batch. Each engine
 /// gets its own independent generator instance seeded identically (via
 /// `Suite::new(seed)`), so registering a generator once here runs the full
 /// randomness-test battery against it in one call.
+#[derive(Default)]
 pub struct Suite<'a> {
     chisq: ChiSqSuite<'a>,
     mcpi: McPiSuite<'a>,
@@ -60,9 +63,20 @@ pub struct Suite<'a> {
     nist: NistSuite<'a>,
 }
 
+macro_rules! config {
+    ($suite:ty, $seed:expr, $conf:expr) => {
+        if let Some(config) = $conf {
+            <$suite>::with_config($seed, config)?
+        } else {
+            <$suite>::new($seed)
+        }
+    };
+}
+
 impl<'a> Suite<'a> {
     /// Creates an empty suite seeded with `seed`, one sub-suite per engine.
-    pub fn new(seed: u64) -> Self {
+    pub fn new(mut seed: u64) -> Self {
+        seed |= 1;
         Self {
             chisq: ChiSqSuite::new(seed),
             mcpi: McPiSuite::new(seed),
@@ -79,22 +93,22 @@ impl<'a> Suite<'a> {
     #[allow(clippy::too_many_arguments)]
     pub fn with_config(
         seed: u64,
-        chisq: ChiSqConfig,
-        mcpi: McPiConfig,
-        serial: SerialConfig,
-        runs: RunsConfig,
-        ks: KsConfig,
-        birthday: BirthdayConfig,
-        nist: NistConfig,
+        chisq: Option<ChiSqConfig>,
+        mcpi: Option<McPiConfig>,
+        serial: Option<SerialConfig>,
+        runs: Option<RunsConfig>,
+        ks: Option<KsConfig>,
+        birthday: Option<BirthdayConfig>,
+        nist: Option<NistConfig>,
     ) -> Result<Self, SuiteError> {
         Ok(Self {
-            chisq: ChiSqSuite::with_config(seed, chisq)?,
-            mcpi: McPiSuite::with_config(seed, mcpi)?,
-            serial: SerialSuite::with_config(seed, serial)?,
-            runs: RunsSuite::with_config(seed, runs)?,
-            ks: KsSuite::with_config(seed, ks)?,
-            birthday: BirthdaySuite::with_config(seed, birthday)?,
-            nist: NistSuite::with_config(seed, nist)?,
+            chisq: config!(ChiSqSuite, seed, chisq),
+            mcpi: config!(McPiSuite, seed, mcpi),
+            serial: config!(SerialSuite, seed, serial),
+            runs: config!(RunsSuite, seed, runs),
+            ks: config!(KsSuite, seed, ks),
+            birthday: config!(BirthdaySuite, seed, birthday),
+            nist: config!(NistSuite, seed, nist),
         })
     }
 
@@ -190,17 +204,23 @@ impl<'a> Suite<'a> {
             let result = SuiteResult {
                 chisq: chisq
                     .remove(&name)
-                    .expect("case registered on every engine"),
-                mcpi: mcpi.remove(&name).expect("case registered on every engine"),
+                    .ok_or(SuiteError::Other("case registered on every engine"))?,
+                mcpi: mcpi
+                    .remove(&name)
+                    .ok_or(SuiteError::Other("case registered on every engine"))?,
                 serial: serial
                     .remove(&name)
-                    .expect("case registered on every engine"),
-                runs: runs.remove(&name).expect("case registered on every engine"),
+                    .ok_or(SuiteError::Other("case registered on every engine"))?,
+                runs: runs
+                    .remove(&name)
+                    .ok_or(SuiteError::Other("case registered on every engine"))?,
                 ks: ks.remove(&name).expect("case registered on every engine"),
                 birthday: birthday
                     .remove(&name)
-                    .expect("case registered on every engine"),
-                nist: nist.remove(&name).expect("case registered on every engine"),
+                    .ok_or(SuiteError::Other("case registered on every engine"))?,
+                nist: nist
+                    .remove(&name)
+                    .ok_or(SuiteError::Other("case registered on every engine"))?,
             };
             out.insert(name, result);
         }

@@ -22,6 +22,7 @@
 use thiserror::Error;
 
 use crate::internal::erfc;
+use crate::verdict::Verdict;
 
 /// Configuration for a paranoid (battery-level) meta-test.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -70,16 +71,6 @@ impl ParanoidConfig {
     }
 }
 
-/// Outcome of a single check within the paranoid meta-test.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum ParanoidVerdict {
-    /// The check was within tolerance.
-    Pass,
-    /// The check exceeded tolerance.
-    Fail,
-}
-
 /// Full result of a paranoid meta-test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -97,15 +88,15 @@ pub struct ParanoidResult {
     /// Upper bound of the acceptable pass-proportion range (NIST 4.2.1).
     pub proportion_upper: f64,
     /// Verdict of the pass-proportion check.
-    pub proportion_verdict: ParanoidVerdict,
+    pub proportion_verdict: Verdict,
     /// Kolmogorov-Smirnov `D` statistic of the p-value distribution against `Uniform(0, 1)`.
     pub ks_d_statistic: f64,
     /// Critical value for the KS uniformity check at `uniformity_alpha`.
     pub ks_critical_value: f64,
     /// Verdict of the p-value uniformity check.
-    pub uniformity_verdict: ParanoidVerdict,
-    /// Overall verdict: [`ParanoidVerdict::Pass`] iff both sub-checks passed.
-    pub verdict: ParanoidVerdict,
+    pub uniformity_verdict: Verdict,
+    /// Overall verdict: [`Verdict::Pass`] iff both sub-checks passed.
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a paranoid meta-test.
@@ -193,9 +184,9 @@ pub fn run_paranoid(
     let proportion_lower = (p_hat - bound).max(0.0);
     let proportion_upper = (p_hat + bound).min(1.0);
     let proportion_verdict = if (proportion_lower..=proportion_upper).contains(&pass_proportion) {
-        ParanoidVerdict::Pass
+        Verdict::Pass
     } else {
-        ParanoidVerdict::Fail
+        Verdict::Fail
     };
 
     let mut sorted = p_values.clone();
@@ -210,17 +201,15 @@ pub fn run_paranoid(
     }
     let ks_critical_value = (-0.5 * (config.uniformity_alpha / 2.0).ln()).sqrt() / n_f.sqrt();
     let uniformity_verdict = if ks_d_statistic <= ks_critical_value {
-        ParanoidVerdict::Pass
+        Verdict::Pass
     } else {
-        ParanoidVerdict::Fail
+        Verdict::Fail
     };
 
-    let verdict = if proportion_verdict == ParanoidVerdict::Pass
-        && uniformity_verdict == ParanoidVerdict::Pass
-    {
-        ParanoidVerdict::Pass
+    let verdict = if proportion_verdict == Verdict::Pass && uniformity_verdict == Verdict::Pass {
+        Verdict::Pass
     } else {
-        ParanoidVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(ParanoidResult {
@@ -272,7 +261,7 @@ mod tests {
             p_value_from_z(z)
         };
         let res = run_paranoid("xorshift32.paranoid_chisq", config, &mut trial).unwrap();
-        assert_eq!(res.verdict, ParanoidVerdict::Pass);
+        assert_eq!(res.verdict, Verdict::Pass);
     }
 
     #[test]
@@ -283,6 +272,6 @@ mod tests {
         };
         let mut trial = |_i: usize| 0.0f64;
         let res = run_paranoid("always-fail", config, &mut trial).unwrap();
-        assert_eq!(res.verdict, ParanoidVerdict::Fail);
+        assert_eq!(res.verdict, Verdict::Fail);
     }
 }

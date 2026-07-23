@@ -2,6 +2,8 @@
 
 use thiserror::Error;
 
+use crate::verdict::Verdict;
+
 /// Configuration for a chi-squared randomness test.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -51,16 +53,6 @@ impl ChiSqConfig {
     }
 }
 
-/// Outcome of a single chi-squared test run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum ChiSqVerdict {
-    /// The observed z-score was within the configured limit.
-    Pass,
-    /// The observed z-score exceeded the configured limit.
-    Fail,
-}
-
 /// Full result of a single chi-squared test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -80,7 +72,7 @@ pub struct ChiSqResult {
     /// z-score threshold used for the verdict.
     pub z_limit: f64,
     /// Final pass/fail verdict.
-    pub verdict: ChiSqVerdict,
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a chi-squared test.
@@ -161,7 +153,7 @@ fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), ChiSqE
 /// Draws `config.samples` values from `sampler` (each expected in `[0, 1)`),
 /// bins them into `config.bins` equal-width buckets, computes the
 /// chi-squared statistic and its normalized z-score, and returns a
-/// [`ChiSqResult`] carrying the [`ChiSqVerdict`].
+/// [`ChiSqResult`] carrying the [`Verdict`].
 pub fn run_chisq(
     name: impl Into<String>,
     sampler: &mut dyn FnMut() -> f64,
@@ -189,9 +181,9 @@ pub fn run_chisq(
     let df = (config.bins - 1) as f64;
     let z_score = (chi2 - df) / (2.0 * df).sqrt();
     let verdict = if z_score.abs() <= config.z_limit {
-        ChiSqVerdict::Pass
+        Verdict::Pass
     } else {
-        ChiSqVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(ChiSqResult {

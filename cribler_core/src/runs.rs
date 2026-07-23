@@ -3,6 +3,8 @@
 
 use thiserror::Error;
 
+use crate::verdict::Verdict;
+
 /// Configuration for a runs test.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -40,16 +42,6 @@ impl RunsConfig {
     }
 }
 
-/// Outcome of a single runs test run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum RunsVerdict {
-    /// The observed z-score was within the configured limit.
-    Pass,
-    /// The observed z-score exceeded the configured limit.
-    Fail,
-}
-
 /// Full result of a single runs test run.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -67,7 +59,7 @@ pub struct RunsResult {
     /// z-score threshold used for the verdict.
     pub z_limit: f64,
     /// Final pass/fail verdict.
-    pub verdict: RunsVerdict,
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running a runs test.
@@ -174,9 +166,9 @@ pub fn run_runs(
     let variance = (16.0 * n_f - 29.0) / 90.0;
     let z_score = (runs as f64 - expected_runs) / variance.sqrt();
     let verdict = if z_score.abs() <= config.z_limit {
-        RunsVerdict::Pass
+        Verdict::Pass
     } else {
-        RunsVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(RunsResult {

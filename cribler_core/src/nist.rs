@@ -13,8 +13,10 @@
 //! Each sub-test yields a p-value; per NIST 4.3, a sequence passes a
 //! sub-test when `p_value >= alpha`.
 
-use crate::internal::{erfc, igamc, normal_cdf};
 use thiserror::Error;
+
+use crate::internal::{erfc, igamc, normal_cdf};
+use crate::verdict::Verdict;
 
 /// Configuration for the NIST SP 800-22 bit-level test suite.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -58,16 +60,6 @@ impl NistConfig {
     }
 }
 
-/// Outcome of a single NIST sub-test.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum NistVerdict {
-    /// `p_value >= alpha`.
-    Pass,
-    /// `p_value < alpha`.
-    Fail,
-}
-
 /// The individual NIST SP 800-22 sub-tests implemented by this module.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -93,7 +85,7 @@ pub struct NistItemResult {
     /// Computed p-value.
     pub p_value: f64,
     /// Pass/fail verdict at the configured `alpha`.
-    pub verdict: NistVerdict,
+    pub verdict: Verdict,
 }
 
 /// Full result of one run of the NIST SP 800-22 bit-level suite.
@@ -108,8 +100,8 @@ pub struct NistResult {
     pub alpha: f64,
     /// One result per sub-test, in the order listed by [`NistTest`].
     pub items: Vec<NistItemResult>,
-    /// Overall verdict: [`NistVerdict::Pass`] iff every sub-test passed.
-    pub verdict: NistVerdict,
+    /// Overall verdict: [`Verdict::Pass`] iff every sub-test passed.
+    pub verdict: Verdict,
 }
 
 /// Errors that can occur while configuring or running the NIST suite.
@@ -143,11 +135,11 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, NistError> {
     Ok(name)
 }
 
-fn verdict_of(p_value: f64, alpha: f64) -> NistVerdict {
+fn verdict_of(p_value: f64, alpha: f64) -> Verdict {
     if p_value >= alpha {
-        NistVerdict::Pass
+        Verdict::Pass
     } else {
-        NistVerdict::Fail
+        Verdict::Fail
     }
 }
 
@@ -308,10 +300,10 @@ pub fn run_nist(
     push(NistTest::LongestRunOfOnes, longest_run_of_ones_test(&bits));
     push(NistTest::CumulativeSums, cumulative_sums_test(&bits));
 
-    let verdict = if items.iter().all(|i| i.verdict == NistVerdict::Pass) {
-        NistVerdict::Pass
+    let verdict = if items.iter().all(|i| i.verdict == Verdict::Pass) {
+        Verdict::Pass
     } else {
-        NistVerdict::Fail
+        Verdict::Fail
     };
 
     Ok(NistResult {
