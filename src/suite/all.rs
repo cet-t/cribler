@@ -237,9 +237,9 @@ mod tests {
         use urng::Sfc32;
 
         let results = Suite::new(1).from_urng32::<Sfc32>().unwrap().run().unwrap();
-        let result = results.get("Sfc32").unwrap();
-        assert_eq!(result.chisq.verdict, crate::ChiSqVerdict::Pass);
-        assert_eq!(result.nist.verdict, crate::NistVerdict::Pass);
+        let result = results.get("urng::Sfc32").unwrap();
+        assert_eq!(result.chisq.verdict, crate::Verdict::Pass);
+        assert_eq!(result.nist.verdict, crate::Verdict::Pass);
     }
 
     #[test]
@@ -272,8 +272,8 @@ mod tests {
         let json = serde_json::to_string(&results).unwrap();
         let round_tripped: super::SuiteResults = serde_json::from_str(&json).unwrap();
         assert_eq!(
-            results["Sfc32"].chisq.verdict,
-            round_tripped["Sfc32"].chisq.verdict
+            results["urng::Sfc32"].chisq.verdict,
+            round_tripped["urng::Sfc32"].chisq.verdict
         );
     }
 }

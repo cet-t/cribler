@@ -3,7 +3,7 @@
 //! # Module map
 //! * [`suite`] / [`paranoid_suite`]: named-case batching (`XxxSuite`) over the [`cribler_core`] engines. [`suite::Suite`] aggregates every engine into one batch.
 //! * [`source`]: [`source::WordSource`] (used by `from_custom` — integer-based, never float) and the [`source::UrngSeed32`]/[`source::UrngSeed64`]/[`source::RandSource`] traits that back `from_urng32`/`from_urng64`/`from_rand`.
-//! * [`urng_support`] (feature `urng`): adds [`urng_support::Test32`]/[`urng_support::Test64`] (`rng.run_chisq(name)`, ...) directly to any `urng::Rng32`/`Rng64` generator.
+//! * [`urng_support`] (feature `urng`): adds [`urng_support::Test`] (`rng.run_chisq(name)`, ...) directly to any `urng::Rng` generator (`Word = u32`/`u64`).
 
 pub mod macros;
 pub mod paranoid_suite;

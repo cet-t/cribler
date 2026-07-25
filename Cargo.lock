@@ -71,7 +71,7 @@ dependencies = [
 
 [[package]]
 name = "cribler"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "cribler_core",
@@ -326,9 +326,9 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "urng"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce66595e7a49ce0918b0da00439808c0ea29b00072f0eb6d8434f7a57d3c4d23"
+checksum = "240fa963e418237382c3530e02e558c202c14714e14f02c62ca91d24a7f83ae4"
 dependencies = [
  "bytemuck",
  "csbindgen",

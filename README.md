@@ -138,13 +138,14 @@ println!("{:?}", result.verdict);
 Every `XxxSuite` is created with a seed — `ChiSqSuite::new(seed)` — and has
 methods that register a named test case from a generator seeded from it:
 
-- `from_urng32::<R>()` / `from_urng64::<R>()` — a `urng::Rng32`/`Rng64` `R`, constructed from the suite's seed via [`UrngSeed32`]/[`UrngSeed64`] (feature `urng`). No instance to pass in.
+- `from_urng32::<R>()` / `from_urng64::<R>()` — a `urng::Rng<Word = u32>`/`Rng<Word = u64>` `R`, constructed from the suite's seed via [`UrngSeed32`]/[`UrngSeed64`] (feature `urng`). No instance to pass in.
 - `from_rand::<R>()` — a `rand_core::Rng` `R`, constructed via `SeedableRng::seed_from_u64` from the suite's seed (feature `rand`). No instance to pass in.
 - `from_custom(source)` — anything else. Custom generators are always integer-based, never float-based: implement `From<YourType> for WordSource` directly and pass an instance through (the suite's seed isn't involved; see the [`source`] module docs for a full example). On the `[0, 1)`-sampling engines, the raw `u64` draws are converted with `unit_f64_from_u32`/`unit_f64_from_u64` depending on `word_bits`.
 
-The case name is taken from the generator's type name (`R`'s name for
+The case name is the crate-qualified type name of the generator (e.g.
+`"urng::Sfc32"`, `"rand::StdRng"`) for
 `from_urng32`/`from_urng64`/`from_rand`, or whatever you pass to
-`WordSource::new` for `from_custom`).
+`WordSource::new` for `from_custom`.
 
 ### `rand` feature
 
@@ -179,7 +180,7 @@ let results = ChiSqSuite::new(0)
     .unwrap()
     .run()
     .unwrap();
-println!("{:?}", results["Sfc32"].verdict);
+println!("{:?}", results["urng::Sfc32"].verdict);
 ```
 
 Chain multiple generator types onto the same `Suite` before calling `run()`
@@ -227,7 +228,7 @@ let results = ChiSqSuite::new(0).from_urng32::<Sfc32>().unwrap().run().unwrap();
 let json = serde_json::to_string(&results).unwrap();
 let round_tripped: hashbrown::HashMap<String, cribler::ChiSqResult> =
     serde_json::from_str(&json).unwrap();
-assert_eq!(results["Sfc32"].verdict, round_tripped["Sfc32"].verdict);
+assert_eq!(results["urng::Sfc32"].verdict, round_tripped["urng::Sfc32"].verdict);
 ```
 
 ## Crate layout

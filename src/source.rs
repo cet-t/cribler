@@ -4,7 +4,7 @@
 //! kinds of methods that register a named test case from a generator seeded
 //! from it:
 //!
-//! * `from_urng32::<R>()`/`from_urng64::<R>()` — a `urng::Rng32`/`Rng64` `R`,
+//! * `from_urng32::<R>()`/`from_urng64::<R>()` — a `urng::Rng<Word = u32>`/`Rng<Word = u64>` `R`,
 //!   constructed via [`UrngSeed32`]/[`UrngSeed64`] from the suite's seed
 //!   (feature `urng`). No instance to pass in; the case name is taken from
 //!   `R`'s type name.
@@ -38,8 +38,9 @@
 //! ```
 //!
 //! [`UrngSeed32`]/[`UrngSeed64`] are blanket-implemented for every
-//! `urng::Rng32`/`Rng64` that also implements `urng::Seed32`/`Seed64`
-//! (construction goes through `urng::Seed32::from_seed`/`Seed64::from_seed`),
+//! `urng::Rng<Word = u32>`/`Rng<Word = u64>` that also implements
+//! `urng::Seed<Seed = u32>`/`Seed<Seed = u64>` (construction goes through
+//! `urng::Seed::from_seed`),
 //! mirroring how [`RandSource`] is blanket-implemented for every
 //! `rand_core::Rng`. Any generator carrying those `urng` traits works with
 //! `from_urng32`/`from_urng64` out of the box.
@@ -64,33 +65,33 @@ impl<'a> WordSource<'a> {
     }
 }
 
-/// A `urng::Rng32` that `Suite::from_urng32` knows how to build from a `u32`
-/// seed (feature `urng`). Blanket-implemented for every `urng::Rng32` that is
-/// also `urng::Seed32`.
+/// A `urng` 32-bit generator that `Suite::from_urng32` knows how to build from
+/// a `u32` seed (feature `urng`). Blanket-implemented for every
+/// `urng::Rng<Word = u32>` that is also `urng::Seed<Seed = u32>`.
 #[cfg(feature = "urng")]
-pub trait UrngSeed32: urng::Rng32 + Sized {
+pub trait UrngSeed32: urng::Rng<Word = u32> + Sized {
     fn from_seed(seed: u32) -> Self;
 }
 
-/// A `urng::Rng64` that `Suite::from_urng64` knows how to build from a `u64`
-/// seed (feature `urng`). Blanket-implemented for every `urng::Rng64` that is
-/// also `urng::Seed64`.
+/// A `urng` 64-bit generator that `Suite::from_urng64` knows how to build from
+/// a `u64` seed (feature `urng`). Blanket-implemented for every
+/// `urng::Rng<Word = u64>` that is also `urng::Seed<Seed = u64>`.
 #[cfg(feature = "urng")]
-pub trait UrngSeed64: urng::Rng64 + Sized {
+pub trait UrngSeed64: urng::Rng<Word = u64> + Sized {
     fn from_seed(seed: u64) -> Self;
 }
 
 #[cfg(feature = "urng")]
-impl<R: urng::Rng32 + urng::Seed32> UrngSeed32 for R {
+impl<R: urng::Rng<Word = u32> + urng::Seed<Seed = u32>> UrngSeed32 for R {
     fn from_seed(seed: u32) -> Self {
-        <Self as urng::Seed32>::from_seed(seed)
+        <Self as urng::Seed>::from_seed(seed)
     }
 }
 
 #[cfg(feature = "urng")]
-impl<R: urng::Rng64 + urng::Seed64> UrngSeed64 for R {
+impl<R: urng::Rng<Word = u64> + urng::Seed<Seed = u64>> UrngSeed64 for R {
     fn from_seed(seed: u64) -> Self {
-        <Self as urng::Seed64>::from_seed(seed)
+        <Self as urng::Seed>::from_seed(seed)
     }
 }
 
@@ -129,15 +130,15 @@ mod tests {
             .unwrap()
             .run()
             .unwrap();
-        assert!(chisq.contains_key("Sfc32"));
-        assert!(chisq.contains_key("Sfc64"));
+        assert!(chisq.contains_key("urng::Sfc32"));
+        assert!(chisq.contains_key("urng::Sfc64"));
 
         let nist = NistSuite::new(1)
             .from_urng32::<Sfc32>()
             .unwrap()
             .run()
             .unwrap();
-        assert!(nist.contains_key("Sfc32"));
+        assert!(nist.contains_key("urng::Sfc32"));
     }
 
     #[cfg(feature = "rand")]
@@ -150,7 +151,7 @@ mod tests {
             .unwrap()
             .run()
             .unwrap();
-        assert!(results.contains_key("StdRng"));
+        assert!(results.contains_key("rand::StdRng"));
     }
 
     #[test]
