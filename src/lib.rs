@@ -14,17 +14,16 @@ pub mod suite;
 #[cfg(feature = "urng")]
 pub mod urng_support;
 
-/// The crate-qualified type name of `T`, e.g. `"urng::Sfc32"` for
-/// `urng::rng::Sfc32`. Used to auto-name cases registered via
-/// `Suite::from_urng32`/`from_urng64`/`from_rand`; including the crate name
-/// keeps identically-named types from different crates (e.g. `urng::Sfc32`
-/// vs. `rand_sfc::Sfc32`) from colliding as case keys.
+/// The crate-qualified type name of `T`, e.g. `"urng::Sfc32"` for `urng::rng::Sfc32`.
+/// Used to auto-name cases registered via `Suite::from_urng32`/`from_urng64`/`from_rand`;
+/// including the crate name keeps identically-named types from different crates
+/// (e.g. `urng::Sfc32` vs. `rand_sfc::Sfc32`) from colliding as case keys.
 #[allow(unused)]
 pub(crate) fn short_type_name<T>() -> String {
     let full = std::any::type_name::<T>();
     let type_name = full.rsplit("::").next().unwrap_or(full);
     match full.split_once("::") {
-        Some((krate, _)) if krate != type_name => format!("{krate}::{type_name}"),
+        Some((cr, _)) if cr != type_name => format!("{cr}::{type_name}"),
         _ => type_name.to_string(),
     }
 }
@@ -35,9 +34,9 @@ pub use paranoid_suite::ParanoidSuite;
 pub use rand_support::*;
 #[cfg(feature = "rand")]
 pub use source::RandSource;
-pub use source::WordSource;
 #[cfg(feature = "urng")]
-pub use source::{UrngSeed32, UrngSeed64};
+pub use source::UrngSeed;
+pub use source::WordSource;
 pub use suite::{
     BirthdaySuite, ChiSqSuite, KsSuite, McPiSuite, NistSuite, RunsSuite, SerialSuite, Suite,
     SuiteError, SuiteResults,

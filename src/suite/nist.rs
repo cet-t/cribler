@@ -91,7 +91,7 @@ impl<'a> NistSuite<'a> {
     #[cfg(feature = "urng")]
     pub fn from_urng32<R>(mut self) -> Result<Self, NistError>
     where
-        R: crate::source::UrngSeed32 + 'a,
+        R: crate::source::UrngSeed<u32> + 'a,
     {
         let mut rng = R::from_seed(self.seed as u32);
         self.add_sampler(crate::short_type_name::<R>(), 32, move || {
@@ -107,7 +107,7 @@ impl<'a> NistSuite<'a> {
     #[cfg(feature = "urng")]
     pub fn from_urng64<R>(mut self) -> Result<Self, NistError>
     where
-        R: crate::source::UrngSeed64 + 'a,
+        R: crate::source::UrngSeed<u64> + 'a,
     {
         let mut rng = R::from_seed(self.seed);
         self.add_sampler(crate::short_type_name::<R>(), 64, move || rng.nextu())?;

@@ -118,7 +118,7 @@ impl<'a> Suite<'a> {
     #[cfg(feature = "urng")]
     pub fn from_urng32<R>(mut self) -> Result<Self, SuiteError>
     where
-        R: crate::source::UrngSeed32 + 'a,
+        R: crate::source::UrngSeed<u32> + 'a,
     {
         self.chisq = self.chisq.from_urng32::<R>()?;
         self.mcpi = self.mcpi.from_urng32::<R>()?;
@@ -136,7 +136,7 @@ impl<'a> Suite<'a> {
     #[cfg(feature = "urng")]
     pub fn from_urng64<R>(mut self) -> Result<Self, SuiteError>
     where
-        R: crate::source::UrngSeed64 + 'a,
+        R: crate::source::UrngSeed<u64> + 'a,
     {
         self.chisq = self.chisq.from_urng64::<R>()?;
         self.mcpi = self.mcpi.from_urng64::<R>()?;

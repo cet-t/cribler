@@ -45,9 +45,9 @@
 //! `rand_core::Rng`. Any generator carrying those `urng` traits works with
 //! `from_urng32`/`from_urng64` out of the box.
 
-/// A named raw-word sampler, ready to be registered on a `Suite` via
-/// `.from_custom(source)`, where `source: impl Into<WordSource>`. `word_bits`
-/// is the number of low bits of each draw that carry entropy (used by
+/// A named raw-word sampler, ready to be registered on a `Suite` via `.from_custom(source)`,
+/// where `source: impl Into<WordSource>`.
+/// `word_bits` is the number of low bits of each draw that carry entropy (used by
 /// [`crate::run_nist`]; ignored by [`crate::run_birthday`]).
 pub struct WordSource<'a> {
     pub(crate) name: String,
@@ -65,32 +65,14 @@ impl<'a> WordSource<'a> {
     }
 }
 
-/// A `urng` 32-bit generator that `Suite::from_urng32` knows how to build from
-/// a `u32` seed (feature `urng`). Blanket-implemented for every
-/// `urng::Rng<Word = u32>` that is also `urng::Seed<Seed = u32>`.
 #[cfg(feature = "urng")]
-pub trait UrngSeed32: urng::Rng<Word = u32> + Sized {
-    fn from_seed(seed: u32) -> Self;
-}
-
-/// A `urng` 64-bit generator that `Suite::from_urng64` knows how to build from
-/// a `u64` seed (feature `urng`). Blanket-implemented for every
-/// `urng::Rng<Word = u64>` that is also `urng::Seed<Seed = u64>`.
-#[cfg(feature = "urng")]
-pub trait UrngSeed64: urng::Rng<Word = u64> + Sized {
-    fn from_seed(seed: u64) -> Self;
+pub trait UrngSeed<W: urng::Word>: urng::Rng<Word = W> + Sized {
+    fn from_seed(seed: W) -> Self;
 }
 
 #[cfg(feature = "urng")]
-impl<R: urng::Rng<Word = u32> + urng::Seed<Seed = u32>> UrngSeed32 for R {
-    fn from_seed(seed: u32) -> Self {
-        <Self as urng::Seed>::from_seed(seed)
-    }
-}
-
-#[cfg(feature = "urng")]
-impl<R: urng::Rng<Word = u64> + urng::Seed<Seed = u64>> UrngSeed64 for R {
-    fn from_seed(seed: u64) -> Self {
+impl<W: urng::Word, R: urng::Rng<Word = W> + urng::Seed<Seed = W>> UrngSeed<W> for R {
+    fn from_seed(seed: W) -> Self {
         <Self as urng::Seed>::from_seed(seed)
     }
 }

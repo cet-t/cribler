@@ -9,8 +9,8 @@ struct Case<'a> {
     trial: Box<dyn FnMut(usize) -> f64 + 'a>,
 }
 
-/// A suite that runs multiple named paranoid meta-test cases and collects
-/// their [`ParanoidResult`]s. Bit-width-agnostic: cases are just p-value
+/// A suite that runs multiple named paranoid meta-test cases and collects their [`ParanoidResult`]s.
+/// Bit-width-agnostic: cases are just p-value
 /// producing closures, regardless of which underlying test they wrap.
 #[derive(Default)]
 pub struct ParanoidSuite<'a> {
@@ -55,14 +55,11 @@ impl<'a> ParanoidSuite<'a> {
 
     /// Registers a named trial closure: `trial(i)` must return the p-value of
     /// the `i`-th independent run of the underlying test.
-    pub fn add_trial<F>(
+    pub fn add_trial(
         &mut self,
         name: impl Into<String>,
-        trial: F,
-    ) -> Result<&mut Self, ParanoidError>
-    where
-        F: FnMut(usize) -> f64 + 'a,
-    {
+        trial: impl FnMut(usize) -> f64 + 'a,
+    ) -> Result<&mut Self, ParanoidError> {
         let name = name.into();
         if name.trim().is_empty() {
             return Err(ParanoidError::EmptyCaseName);
@@ -83,8 +80,11 @@ impl<'a> ParanoidSuite<'a> {
                     name: case.name.clone(),
                 });
             }
-            let result = run_paranoid(case.name.clone(), self.config, case.trial.as_mut())?;
-            out.push(result);
+            out.push(run_paranoid(
+                case.name.clone(),
+                self.config,
+                case.trial.as_mut(),
+            )?);
         }
         Ok(out)
     }

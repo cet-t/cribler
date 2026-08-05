@@ -86,7 +86,7 @@ impl<'a> BirthdaySuite<'a> {
     #[cfg(feature = "urng")]
     pub fn from_urng32<R>(mut self) -> Result<Self, BirthdayError>
     where
-        R: crate::source::UrngSeed32 + 'a,
+        R: crate::source::UrngSeed<u32> + 'a,
     {
         let mut rng = R::from_seed(self.seed as u32);
         self.add_sampler(crate::short_type_name::<R>(), move || rng.nextu() as u64)?;
@@ -99,7 +99,7 @@ impl<'a> BirthdaySuite<'a> {
     #[cfg(feature = "urng")]
     pub fn from_urng64<R>(mut self) -> Result<Self, BirthdayError>
     where
-        R: crate::source::UrngSeed64 + 'a,
+        R: crate::source::UrngSeed<u64> + 'a,
     {
         let mut rng = R::from_seed(self.seed);
         self.add_sampler(crate::short_type_name::<R>(), move || rng.nextu())?;
