@@ -88,9 +88,9 @@ dependencies = [
 
 [[package]]
 name = "cribler_core"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d08fa9cadb7ea1a7b42b3ae8516962f44ff6131bd4a5f3e88c2944673d114c0d"
+checksum = "43fa68fdc6ae8b099359b14f2baef0d647307cd8946c83415bd4200746247ca9"
 dependencies = [
  "serde",
  "thiserror",

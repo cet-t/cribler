@@ -15,7 +15,7 @@ lto = "fat"
 codegen-units = 1
 
 [dependencies]
-cribler_core = "0.2"
+cribler_core = "0.3.0"
 rand_core = { version = "0.10", optional = true }
 urng = { version = "0.13.0", optional = true }
 pastey = { version = "0.2.3", optional = true }
