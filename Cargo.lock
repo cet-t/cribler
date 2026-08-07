@@ -71,7 +71,7 @@ dependencies = [
 
 [[package]]
 name = "cribler"
-version = "0.5.0"
+version = "0.6.0-rc.1"
 dependencies = [
  "anyhow",
  "cribler_core",
@@ -326,9 +326,9 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "urng"
-version = "0.13.0"
+version = "1.0.0-rc.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "240fa963e418237382c3530e02e558c202c14714e14f02c62ca91d24a7f83ae4"
+checksum = "2340438977787d7c941e26ecb6ceb3c3843b0d120fec8709e4cd9be1d3f5f618"
 dependencies = [
  "bytemuck",
  "csbindgen",
@@ -338,9 +338,9 @@ dependencies = [
 
 [[package]]
 name = "wrapn"
-version = "0.6.2"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5ef8b69c53e9b5a27612c3db6bec71a750fc8248b44b0c69449c57435e982f0"
+checksum = "71c6cd260db02b513f2b70c439d99dbc2b95c6a1117763fd8d66cd7d9f862242"
 dependencies = [
  "paste",
 ]

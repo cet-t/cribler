@@ -117,9 +117,9 @@ where
     }
 
     fn run_nist(&mut self, name: impl Into<String>) -> Result<NistResult, NistError> {
-        let word_bits = <Self::Word as Word>::BITS;
+        let word_bits = std::mem::size_of::<<Self::Word as Word>::Int>() * 8;
         let mut sampler = || self.nextu().to_u64();
-        run_nist(name, &mut sampler, word_bits, NistConfig::default())
+        run_nist(name, &mut sampler, word_bits as u32, NistConfig::default())
     }
 }
 

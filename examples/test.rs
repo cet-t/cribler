@@ -13,7 +13,7 @@ impl<'a> From<Tiny64> for WordSource<'a> {
 }
 
 fn main() -> anyhow::Result<()> {
-    let results = suite!()
+    let results = cribler::Suite::default()
         .from_custom(Tiny64(1))?
         .from_urng32::<urng::Sfc32>()?
         .from_rand::<rand_sfc::Sfc32>()?
