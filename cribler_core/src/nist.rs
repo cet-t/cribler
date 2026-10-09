@@ -13,10 +13,10 @@
 //! Each sub-test yields a p-value; per NIST 4.3, a sequence passes a
 //! sub-test when `p_value >= alpha`.
 
-use alloc::{string::String, vec::Vec};
-
+use heapless::Vec;
 use thiserror::Error;
 
+use crate::String;
 use crate::internal::{erfc, igamc, normal_cdf};
 use crate::verdict::Verdict;
 
@@ -101,7 +101,7 @@ pub struct NistResult {
     /// Significance level used for every sub-test.
     pub alpha: f64,
     /// One result per sub-test, in the order listed by [`NistTest`].
-    pub items: Vec<NistItemResult>,
+    pub items: Vec<NistItemResult, 5>,
     /// Overall verdict: [`Verdict::Pass`] iff every sub-test passed.
     pub verdict: Verdict,
 }
@@ -145,8 +145,8 @@ fn verdict_of(p_value: f64, alpha: f64) -> Verdict {
     }
 }
 
-fn draw_bits(word_sampler: &mut dyn FnMut() -> u64, word_bits: u32, n: usize) -> Vec<bool> {
-    let mut bits = Vec::with_capacity(n);
+fn draw_bits(word_sampler: &mut dyn FnMut() -> u64, word_bits: u32, n: usize) -> Vec<bool, 5> {
+    let mut bits = Vec::<_, 5>::new();
     'outer: loop {
         let w = word_sampler();
         for i in (0..word_bits).rev() {
@@ -274,7 +274,7 @@ fn cumulative_sums_test(bits: &[bool]) -> f64 {
 /// Runs the NIST SP 800-22 bit-level test suite for the given named
 /// word-sampler and configuration. `word_bits` is the number of low bits of
 /// each `word_sampler()` draw that carry entropy (typically 32 or 64).
-pub fn run_nist(
+pub fn run_nist<const N: usize>(
     name: impl Into<String>,
     word_sampler: &mut dyn FnMut() -> u64,
     word_bits: u32,
@@ -284,7 +284,7 @@ pub fn run_nist(
     let name = validate_case_name(name.into())?;
     let bits = draw_bits(word_sampler, word_bits, config.bits);
 
-    let mut items = Vec::with_capacity(5);
+    let mut items = Vec::<_, 5>::new();
     let mut push = |test: NistTest, p_value: f64| {
         items.push(NistItemResult {
             test,

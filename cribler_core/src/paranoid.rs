@@ -19,10 +19,12 @@
 //! a closure that returns a p-value, and [`run_paranoid`] applies the
 //! meta-level checks.
 
-use alloc::{string::String, vec::Vec};
+use core::fmt::Write;
 
+use heapless::Vec;
 use thiserror::Error;
 
+use crate::String;
 use crate::internal::erfc;
 use crate::verdict::Verdict;
 
@@ -155,14 +157,16 @@ pub fn p_value_from_z(z_score: f64) -> f64 {
 /// independent run of the underlying test, then applies the NIST SP 800-22
 /// 4.2 proportion-of-passes and p-value-uniformity checks.
 pub fn run_paranoid(
-    name: impl Into<String>,
+    name: &str,
     config: ParanoidConfig,
     trial: &mut dyn FnMut(usize) -> f64,
 ) -> Result<ParanoidResult, ParanoidError> {
     config.validate()?;
-    let name = validate_case_name(name.into())?;
+    let mut _name = String::new();
+    _name.write_str(name);
+    let name = validate_case_name(_name)?;
 
-    let mut p_values = Vec::with_capacity(config.trials);
+    let mut p_values = Vec::<_, 5>::new();
     for trial_index in 0..config.trials {
         let p = trial(trial_index);
         if !p.is_finite() || !(0.0..=1.0).contains(&p) {
@@ -231,10 +235,13 @@ pub fn run_paranoid(
 
 #[cfg(test)]
 mod tests {
-    use alloc::format;
+    use core::fmt::Write;
 
     use super::*;
-    use crate::chisq::{ChiSqConfig, run_chisq};
+    use crate::{
+        String,
+        chisq::{ChiSqConfig, run_chisq},
+    };
 
     // A tiny xorshift32 PRNG, used only so the crate's own tests have no
     // external RNG dependency.
@@ -259,7 +266,9 @@ mod tests {
         let mut trial = |i: usize| {
             let mut rng = Xorshift32((i as u32 + 1).wrapping_mul(2654435761) | 1);
             let mut sampler = || rng.next() as f64 * (1.0 / 4294967296.0);
-            let z = run_chisq(format!("trial-{i}"), &mut sampler, ChiSqConfig::default())
+            let mut s = String::new();
+            s.write_fmt(format_args!("trial-{i}"));
+            let z = run_chisq(s, &mut sampler, ChiSqConfig::default())
                 .unwrap()
                 .z_score;
             p_value_from_z(z)

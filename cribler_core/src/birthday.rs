@@ -2,11 +2,11 @@
 //! test): detects short periods and lattice structure by checking whether
 //! collisions among sampled "birthdays" occur at the expected rate.
 
-use alloc::{string::String, vec::Vec};
+use heapless::vec::Vec;
 
 use thiserror::Error;
 
-use crate::verdict::Verdict;
+use crate::{String, verdict::Verdict};
 
 /// Configuration for a birthday spacing test.
 ///
@@ -17,9 +17,7 @@ use crate::verdict::Verdict;
 /// with mean `lambda = points^3 / (4 * space)` (Marsaglia, 1985).
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct BirthdayConfig {
-    /// Number of "birthday" points sampled per test run.
-    pub points: usize,
+pub struct BirthdayConfig<const N: usize = 1024> {
     /// Dimensionality of the space each birthday is drawn from.
     pub dim: usize,
     /// Number of bits per axis (space size per axis is `2^bits_per_axis`).
@@ -36,7 +34,6 @@ impl Default for BirthdayConfig {
     /// sources with as little as 32 bits of entropy per draw.
     fn default() -> Self {
         Self {
-            points: 4096,
             dim: 2,
             bits_per_axis: 16,
             z_limit: 3.0,
@@ -44,13 +41,11 @@ impl Default for BirthdayConfig {
     }
 }
 
-impl BirthdayConfig {
+impl<const N: usize> BirthdayConfig<N> {
     /// Validates the configuration, returning a [`BirthdayError`] describing the first problem found.
     pub fn validate(&self) -> Result<(), BirthdayError> {
-        if self.points < 2 {
-            return Err(BirthdayError::InvalidPoints {
-                points: self.points,
-            });
+        if N < 2 {
+            return Err(BirthdayError::InvalidPoints { points: N });
         }
         if self.dim == 0 {
             return Err(BirthdayError::InvalidDim { dim: self.dim });
@@ -138,10 +133,10 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, BirthdayError> 
 /// repeat (a "collision"). The collision count is compared against the
 /// theoretical Poisson mean `points^3 / (4 * space)` (Marsaglia's birthday
 /// spacings test, as used in DIEHARD).
-pub fn run_birthday(
+pub fn run_birthday<const N: usize>(
     name: impl Into<String>,
     sampler: &mut dyn FnMut() -> u64,
-    config: BirthdayConfig,
+    config: BirthdayConfig<N>,
 ) -> Result<BirthdayResult, BirthdayError> {
     config.validate()?;
     let name = validate_case_name(name.into())?;
@@ -158,10 +153,10 @@ pub fn run_birthday(
         (1u64 << space_bits) as f64
     };
 
-    let mut days: Vec<u64> = (0..config.points).map(|_| sampler() & mask).collect();
+    let mut days: Vec<u64, N> = (0..N).map(|_| sampler() & mask).collect();
     days.sort_unstable();
 
-    let mut spacings: Vec<u64> = days.windows(2).map(|w| w[1] - w[0]).collect();
+    let mut spacings: Vec<u64, N> = days.windows(2).map(|w| w[1] - w[0]).collect();
     spacings.sort_unstable();
 
     let mut collisions = 0usize;
@@ -171,7 +166,7 @@ pub fn run_birthday(
         }
     }
 
-    let n = config.points as f64;
+    let n: f64 = N as f64;
     let expected_collisions = n.powi(3) / (4.0 * space);
     let variance = expected_collisions.max(f64::EPSILON);
     let z_score = (collisions as f64 - expected_collisions) / variance.sqrt();
@@ -183,7 +178,7 @@ pub fn run_birthday(
 
     Ok(BirthdayResult {
         name,
-        points: config.points,
+        points: N,
         collisions,
         expected_collisions,
         z_score,

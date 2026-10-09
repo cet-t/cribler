@@ -1,10 +1,8 @@
 //! Monte Carlo pi-estimation test engine.
 
-use alloc::string::{String, ToString};
-
 use thiserror::Error;
 
-use crate::verdict::Verdict;
+use crate::{String, verdict::Verdict};
 
 /// Configuration for a Monte Carlo pi-estimation test.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -113,13 +111,11 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, McPiError> {
 }
 
 fn validate_sample(
-    case: &str,
+    case: String,
     sample_index: usize,
     axis: &'static str,
     x: f64,
 ) -> Result<(), McPiError> {
-    let case = case.to_string();
-
     if !x.is_finite() {
         return Err(McPiError::NonFiniteSample {
             case,
@@ -156,9 +152,9 @@ pub fn run_mcpi(
     let mut inside_circle = 0u64;
     for sample_index in 0..config.pairs {
         let x = sampler();
-        validate_sample(&name, sample_index, "x", x)?;
+        validate_sample(name.clone(), sample_index, "x", x)?;
         let y = sampler();
-        validate_sample(&name, sample_index, "y", y)?;
+        validate_sample(name.clone(), sample_index, "y", y)?;
         if x * x + y * y < 1.0 {
             inside_circle += 1;
         }

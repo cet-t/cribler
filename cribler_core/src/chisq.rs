@@ -1,22 +1,16 @@
 //! Chi-squared uniformity test engine.
 
-use alloc::{
-    string::{String, ToString},
-    vec,
-};
-
+use heapless::Vec;
 use thiserror::Error;
 
-use crate::verdict::Verdict;
+use crate::{String, verdict::Verdict};
 
 /// Configuration for a chi-squared randomness test.
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ChiSqConfig {
+pub struct ChiSqConfig<const N: usize = 256> {
     /// Number of random samples drawn per test run.
     pub samples: usize,
-    /// Number of equal-width histogram bins over `[0, 1)`.
-    pub bins: usize,
     /// Maximum absolute z-score (`|z|`) permitted for a passing result.
     pub z_limit: f64,
 }
@@ -26,13 +20,12 @@ impl Default for ChiSqConfig {
     fn default() -> Self {
         Self {
             samples: 1_000_000,
-            bins: 256,
             z_limit: 3.0,
         }
     }
 }
 
-impl ChiSqConfig {
+impl<const N: usize> ChiSqConfig<N> {
     /// Validates the configuration, returning a [`ChiSqError`] describing the first problem found.
     pub fn validate(&self) -> Result<(), ChiSqError> {
         if self.samples == 0 {
@@ -40,13 +33,13 @@ impl ChiSqConfig {
                 samples: self.samples,
             });
         }
-        if self.bins < 2 {
-            return Err(ChiSqError::InvalidBins { bins: self.bins });
+        if N < 2 {
+            return Err(ChiSqError::InvalidBins { bins: N });
         }
-        if self.samples < self.bins {
+        if self.samples < N {
             return Err(ChiSqError::SamplesLessThanBins {
                 samples: self.samples,
-                bins: self.bins,
+                bins: N,
             });
         }
         if !self.z_limit.is_finite() || self.z_limit <= 0.0 {
@@ -135,9 +128,7 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, ChiSqError> {
     Ok(name)
 }
 
-fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), ChiSqError> {
-    let case = case.to_string();
-
+fn validate_sample(case: String, sample_index: usize, x: f64) -> Result<(), ChiSqError> {
     if !x.is_finite() {
         return Err(ChiSqError::NonFiniteSample {
             case,
@@ -161,23 +152,23 @@ fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), ChiSqE
 /// bins them into `config.bins` equal-width buckets, computes the
 /// chi-squared statistic and its normalized z-score, and returns a
 /// [`ChiSqResult`] carrying the [`Verdict`].
-pub fn run_chisq(
+pub fn run_chisq<const N: usize>(
     name: impl Into<String>,
     sampler: &mut dyn FnMut() -> f64,
-    config: ChiSqConfig,
+    config: ChiSqConfig<N>,
 ) -> Result<ChiSqResult, ChiSqError> {
     config.validate()?;
     let name = validate_case_name(name.into())?;
-    let mut counts = vec![0u64; config.bins];
+    let mut counts = Vec::<u64, N>::new(); // vec![0u64; config.bins];
 
     for sample_index in 0..config.samples {
         let x = sampler();
-        validate_sample(&name, sample_index, x)?;
-        let bin = ((x * config.bins as f64) as usize).min(config.bins - 1);
+        validate_sample(name.clone(), sample_index, x)?;
+        let bin = ((x * N as f64) as usize).min(N - 1);
         counts[bin] += 1;
     }
 
-    let expected = config.samples as f64 / config.bins as f64;
+    let expected = config.samples as f64 / N as f64;
     let chi2 = counts
         .iter()
         .map(|&c| {
@@ -185,7 +176,7 @@ pub fn run_chisq(
             (delta * delta) / expected
         })
         .sum::<f64>();
-    let df = (config.bins - 1) as f64;
+    let df = (N - 1) as f64;
     let z_score = (chi2 - df) / (2.0 * df).sqrt();
     let verdict = if z_score.abs() <= config.z_limit {
         Verdict::Pass
@@ -196,7 +187,7 @@ pub fn run_chisq(
     Ok(ChiSqResult {
         name,
         samples: config.samples,
-        bins: config.bins,
+        bins: N,
         chi2,
         df,
         z_score,

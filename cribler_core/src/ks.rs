@@ -1,14 +1,10 @@
 //! Kolmogorov-Smirnov test engine: checks the maximum deviation between the
 //! empirical CDF of the samples and the ideal uniform CDF.
 
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
-
+use heapless::Vec;
 use thiserror::Error;
 
-use crate::verdict::Verdict;
+use crate::{String, verdict::Verdict};
 
 /// Configuration for a Kolmogorov-Smirnov uniformity test.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -118,17 +114,17 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, KsError> {
     Ok(name)
 }
 
-fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), KsError> {
+fn validate_sample(case: String, sample_index: usize, x: f64) -> Result<(), KsError> {
     if !x.is_finite() {
         return Err(KsError::NonFiniteSample {
-            case: case.to_string(),
+            case,
             sample_index,
             value: x,
         });
     }
     if !(0.0..1.0).contains(&x) {
         return Err(KsError::OutOfRangeSample {
-            case: case.to_string(),
+            case,
             sample_index,
             value: x,
         });
@@ -142,7 +138,7 @@ fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), KsErro
 /// Draws `config.samples` values, sorts them, and computes the maximum
 /// deviation between the empirical CDF and the ideal `Uniform(0, 1)` CDF:
 /// `D = max_i max(i/n - x_(i), x_(i) - (i-1)/n)`.
-pub fn run_ks(
+pub fn run_ks<const N: usize>(
     name: impl Into<String>,
     sampler: &mut dyn FnMut() -> f64,
     config: KsConfig,
@@ -151,10 +147,10 @@ pub fn run_ks(
     let name = validate_case_name(name.into())?;
 
     let n = config.samples;
-    let mut xs = Vec::with_capacity(n);
+    let mut xs = Vec::<f64, N>::new(); //with_capacity(n);
     for sample_index in 0..n {
         let x = sampler();
-        validate_sample(&name, sample_index, x)?;
+        validate_sample(name.clone(), sample_index, x)?;
         xs.push(x);
     }
     xs.sort_by(|a, b| a.partial_cmp(b).unwrap());

@@ -11,7 +11,7 @@
 //! * [`nist`]: NIST SP 800-22 bit-level test suite (5-test subset).
 //! * [`paranoid`]: elevates any single test into a battery-level test (NIST SP 800-22 4.2).
 
-extern crate alloc;
+pub(crate) type String = heapless::String<32>;
 
 pub mod birthday;
 pub mod chisq;
