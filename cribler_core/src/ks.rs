@@ -1,6 +1,11 @@
 //! Kolmogorov-Smirnov test engine: checks the maximum deviation between the
 //! empirical CDF of the samples and the ideal uniform CDF.
 
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
+
 use thiserror::Error;
 
 use crate::verdict::Verdict;

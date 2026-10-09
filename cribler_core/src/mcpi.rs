@@ -1,6 +1,6 @@
 //! Monte Carlo pi-estimation test engine.
 
-use std::f64;
+use alloc::string::{String, ToString};
 
 use thiserror::Error;
 
@@ -118,9 +118,11 @@ fn validate_sample(
     axis: &'static str,
     x: f64,
 ) -> Result<(), McPiError> {
+    let case = case.to_string();
+
     if !x.is_finite() {
         return Err(McPiError::NonFiniteSample {
-            case: case.to_string(),
+            case,
             sample_index,
             axis,
             value: x,
@@ -128,7 +130,7 @@ fn validate_sample(
     }
     if !(0.0..1.0).contains(&x) {
         return Err(McPiError::OutOfRangeSample {
-            case: case.to_string(),
+            case,
             sample_index,
             axis,
             value: x,
@@ -163,8 +165,8 @@ pub fn run_mcpi(
     }
 
     let pi_estimate = 4.0 * inside_circle as f64 / config.pairs as f64;
-    let absolute_error = (pi_estimate - f64::consts::PI).abs();
-    let error_pct = (absolute_error / f64::consts::PI) * 100.0;
+    let absolute_error = (pi_estimate - core::f64::consts::PI).abs();
+    let error_pct = (absolute_error / core::f64::consts::PI) * 100.0;
     let verdict = if error_pct <= config.max_error_pct {
         Verdict::Pass
     } else {

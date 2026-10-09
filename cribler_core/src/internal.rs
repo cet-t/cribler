@@ -23,7 +23,7 @@ pub fn erfc(x: f64) -> f64 {
 
 /// Standard normal CDF `Phi(x)`, derived from [`erfc`].
 pub fn normal_cdf(x: f64) -> f64 {
-    0.5 * erfc(-x / std::f64::consts::SQRT_2)
+    0.5 * erfc(-x / core::f64::consts::SQRT_2)
 }
 
 /// Upper regularized incomplete gamma function `Q(a, x) = Gamma(a, x) / Gamma(a)`,
@@ -60,7 +60,7 @@ fn ln_gamma(x: f64) -> f64 {
         1.505_632_735_149_312e-7,
     ];
     if x < 0.5 {
-        return (std::f64::consts::PI / (std::f64::consts::PI * x).sin()).ln() - ln_gamma(1.0 - x);
+        return (core::f64::consts::PI / (core::f64::consts::PI * x).sin()).ln() - ln_gamma(1.0 - x);
     }
     let x = x - 1.0;
     let mut a = COEF[0];
@@ -68,7 +68,7 @@ fn ln_gamma(x: f64) -> f64 {
     for (i, &c) in COEF.iter().enumerate().skip(1) {
         a += c / (x + i as f64);
     }
-    0.5 * (2.0 * std::f64::consts::PI).ln() + (x + 0.5) * t.ln() - t + a.ln()
+    0.5 * (2.0 * core::f64::consts::PI).ln() + (x + 0.5) * t.ln() - t + a.ln()
 }
 
 fn igamma_series(a: f64, x: f64) -> f64 {

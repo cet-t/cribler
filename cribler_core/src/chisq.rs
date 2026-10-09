@@ -1,5 +1,10 @@
 //! Chi-squared uniformity test engine.
 
+use alloc::{
+    string::{String, ToString},
+    vec,
+};
+
 use thiserror::Error;
 
 use crate::verdict::Verdict;
@@ -131,16 +136,18 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, ChiSqError> {
 }
 
 fn validate_sample(case: &str, sample_index: usize, x: f64) -> Result<(), ChiSqError> {
+    let case = case.to_string();
+
     if !x.is_finite() {
         return Err(ChiSqError::NonFiniteSample {
-            case: case.to_string(),
+            case,
             sample_index,
             value: x,
         });
     }
     if !(0.0..1.0).contains(&x) {
         return Err(ChiSqError::OutOfRangeSample {
-            case: case.to_string(),
+            case,
             sample_index,
             value: x,
         });

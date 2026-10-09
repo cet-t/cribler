@@ -2,6 +2,8 @@
 //! test): detects short periods and lattice structure by checking whether
 //! collisions among sampled "birthdays" occur at the expected rate.
 
+use alloc::{string::String, vec::Vec};
+
 use thiserror::Error;
 
 use crate::verdict::Verdict;

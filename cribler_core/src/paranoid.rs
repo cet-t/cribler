@@ -19,6 +19,8 @@
 //! a closure that returns a p-value, and [`run_paranoid`] applies the
 //! meta-level checks.
 
+use alloc::{string::String, vec::Vec};
+
 use thiserror::Error;
 
 use crate::internal::erfc;
@@ -145,7 +147,7 @@ pub(crate) fn validate_case_name(name: String) -> Result<String, ParanoidError> 
 /// [`crate::serial::SerialResult`], or [`crate::runs::RunsResult`]) into an
 /// approximate p-value, suitable as a trial input to [`run_paranoid`].
 pub fn p_value_from_z(z_score: f64) -> f64 {
-    erfc(z_score.abs() / std::f64::consts::SQRT_2)
+    erfc(z_score.abs() / core::f64::consts::SQRT_2)
 }
 
 /// Runs a paranoid (battery-level) meta-test: calls `trial` once per configured
@@ -229,6 +231,8 @@ pub fn run_paranoid(
 
 #[cfg(test)]
 mod tests {
+    use alloc::format;
+
     use super::*;
     use crate::chisq::{ChiSqConfig, run_chisq};
 

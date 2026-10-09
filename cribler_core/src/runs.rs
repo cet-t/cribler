@@ -1,6 +1,8 @@
 //! Runs test engine: detects sequential correlation by analyzing the lengths
 //! of monotonic ascending/descending runs in the output sequence.
 
+use alloc::string::{String, ToString};
+
 use thiserror::Error;
 
 use crate::verdict::Verdict;

@@ -1,6 +1,12 @@
 //! Serial test engine: a multi-dimensional generalization of the chi-squared
 //! test that checks for correlation between consecutive outputs.
 
+use alloc::{
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
+
 use thiserror::Error;
 
 use crate::verdict::Verdict;

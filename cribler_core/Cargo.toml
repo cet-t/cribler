@@ -6,13 +6,8 @@ license = "MIT"
 authors = ["cet"]
 description = "Core statistical randomness-test engines (closure-based, RNG-library-agnostic). Extend via cribler."
 repository = "https://github.com/cet-t/cribler"
-keywords = ["random", "rng", "statistics", "testing", "randomness"]
+keywords = ["no_std", "random", "rng", "statistics", "testing", "randomness"]
 categories = ["algorithms", "science", "development-tools::testing"]
-
-[profile.release]
-opt-level = 3
-lto = "fat"
-codegen-units = 1
 
 [dependencies]
 thiserror = "2"

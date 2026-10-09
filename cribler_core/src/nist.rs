@@ -13,6 +13,8 @@
 //! Each sub-test yields a p-value; per NIST 4.3, a sequence passes a
 //! sub-test when `p_value >= alpha`.
 
+use alloc::{string::String, vec::Vec};
+
 use thiserror::Error;
 
 use crate::internal::{erfc, igamc, normal_cdf};
@@ -161,7 +163,7 @@ fn frequency_test(bits: &[bool]) -> f64 {
     let n = bits.len() as f64;
     let s: i64 = bits.iter().map(|&b| if b { 1 } else { -1 }).sum();
     let s_obs = (s.abs() as f64) / n.sqrt();
-    erfc(s_obs / std::f64::consts::SQRT_2)
+    erfc(s_obs / core::f64::consts::SQRT_2)
 }
 
 fn block_frequency_test(bits: &[bool], m: usize) -> f64 {

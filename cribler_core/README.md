@@ -8,6 +8,8 @@ plain `FnMut() -> T` sampler (`T` is `f64` for the `[0, 1)`-float engines,
 carrying a `Verdict`. There is **no dependency on any RNG crate** — wrap
 whatever generator you have in a closure and call the engine directly.
 
+The crate is `#![no_std]` (it requires `alloc`).
+
 This is the low-level, dependency-minimal foundation (mirroring the
 `rand_core`/`rand` split). The companion [`cribler`](https://crates.io/crates/cribler)
 crate builds ergonomic named-case batching (`XxxSuite`) and optional
@@ -17,15 +19,15 @@ you want the batteries-included experience.
 
 ## Engines
 
-| Engine | What it detects |
-|---|---|
-| `chisq` | Chi-squared uniformity test |
-| `mcpi` | Monte Carlo estimation of pi (sanity check on 2D uniformity) |
-| `serial` | Multi-dimensional chi-squared test over tuples of consecutive outputs (correlation) |
-| `runs` | Sequential correlation via monotonic ascending/descending run lengths |
-| `ks` | Kolmogorov-Smirnov test against the ideal uniform CDF |
-| `birthday` | Marsaglia's DIEHARD birthday-spacings test (short periods, lattice structure) |
-| `nist` | NIST SP 800-22 bit-level test suite (Frequency, Block Frequency, Runs, Longest-Run-of-Ones, Cumulative Sums) |
+| Engine     | What it detects                                                                                                       |
+| ---------- | --------------------------------------------------------------------------------------------------------------------- |
+| `chisq`    | Chi-squared uniformity test                                                                                           |
+| `mcpi`     | Monte Carlo estimation of pi (sanity check on 2D uniformity)                                                          |
+| `serial`   | Multi-dimensional chi-squared test over tuples of consecutive outputs (correlation)                                   |
+| `runs`     | Sequential correlation via monotonic ascending/descending run lengths                                                 |
+| `ks`       | Kolmogorov-Smirnov test against the ideal uniform CDF                                                                 |
+| `birthday` | Marsaglia's DIEHARD birthday-spacings test (short periods, lattice structure)                                         |
+| `nist`     | NIST SP 800-22 bit-level test suite (Frequency, Block Frequency, Runs, Longest-Run-of-Ones, Cumulative Sums)          |
 | `paranoid` | Elevates any single test into a battery-level test (NIST SP 800-22 §4.2: pass-proportion + p-value-uniformity checks) |
 
 ## Example
@@ -74,6 +76,10 @@ the closure:
 // urng
 let mut rng = urng::Sfc32::new(0);
 let mut sampler = || cribler_core::unit_f64_from_u32(rng.nextu());
+
+// urng_core
+let mut rng = urng_splitmix::SplitMix32::new(0);
+let mut sampler = || cribler_core::unit_f64::from_u32(rng.nextu());
 
 // rand (rand_core::Rng)
 let mut rng = rand::rngs::SmallRng::seed_from_u64(0);
