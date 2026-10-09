@@ -1,23 +1,19 @@
 [package]
 name = "cribler"
-version = "0.6.0-rc.1"
+version = "0.7.0"
 edition = "2024"
 license = "MIT"
 authors = ["cet"]
-description = "Statistical randomness-test toolkit (chi-squared, serial, runs, KS, birthday spacing, NIST SP 800-22, paranoid meta-test). Batteries-included layer over cribler_core."
+description = "Statistical randomness-test toolkit. Batteries-included layer over cribler_core."
 repository = "https://github.com/cet-t/cribler"
-keywords = ["random", "rng", "statistics", "testing", "nist"]
+keywords = ["random", "rng", "statistics", "testing"]
 categories = ["algorithms", "science", "development-tools::testing"]
-
-[profile.release]
-opt-level = 3
-lto = "fat"
-codegen-units = 1
 
 [dependencies]
 cribler_core = "0.3.0"
 rand_core = { version = "0.10", optional = true }
-urng = { version = "1.0.0-rc.2", optional = true }
+urng = { version = "1.0.0", optional = true }
+urng_core = { version = "0.1.1", optional = true }
 pastey = { version = "0.2.3", optional = true }
 hashbrown = { version = "0.17.1", features = ["serde"] }
 thiserror = "2.0.19"
@@ -26,7 +22,9 @@ serde = { version = "1.0.229", optional = true, features = ["derive"] }
 [dev-dependencies]
 rand = { version = "0.10", default-features = false, features = ["std_rng"] }
 rand_core = "0.10"
-urng = "1.0.0-rc.2"
+urng = "1.0.0"
+urng_core = "0.1.1"
+urng_splitmix = { git = "https://github.com/cet-t/urng_splitmix" }
 anyhow = "1.0.104"
 rand_sfc = "0.2.0"
 serde_json = "1.0"
@@ -35,6 +33,7 @@ hashbrown = { version = "0.17.1", features = ["serde"] }
 [features]
 rand = ["dep:rand_core"]
 urng = ["dep:urng", "dep:pastey"]
+urng_core = ["dep:urng_core"]
 serde = ["dep:serde", "cribler_core/serde"]
 
 [[example]]

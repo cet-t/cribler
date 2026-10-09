@@ -148,6 +148,27 @@ impl<'a> Suite<'a> {
         Ok(self)
     }
 
+    /// Registers a `urng_core::Rng` generator `R`, built by `make` from this
+    /// suite's seed (truncated to `R::Word`), as a named test case (case name =
+    /// `R`'s type name). `urng_core` has no seeding trait, so any generator
+    /// works: `.from_urng_core(|seed| MyRng::new(seed))`; feature `urng_core`.
+    #[cfg(feature = "urng_core")]
+    pub fn from_urng_core<R, F>(mut self, make: F) -> Result<Self, SuiteError>
+    where
+        R: urng_core::Rng + 'a,
+        R::Word: crate::urng_core_support::CoreWord,
+        F: Fn(R::Word) -> R,
+    {
+        self.chisq = self.chisq.from_urng_core(&make)?;
+        self.mcpi = self.mcpi.from_urng_core(&make)?;
+        self.serial = self.serial.from_urng_core(&make)?;
+        self.runs = self.runs.from_urng_core(&make)?;
+        self.ks = self.ks.from_urng_core(&make)?;
+        self.birthday = self.birthday.from_urng_core(&make)?;
+        self.nist = self.nist.from_urng_core(&make)?;
+        Ok(self)
+    }
+
     /// Registers a `rand_core::Rng` generator `R` on every engine, each from
     /// its own independent instance seeded from this suite's seed via
     /// `SeedableRng::seed_from_u64`. No instance to pass in; feature `rand`.

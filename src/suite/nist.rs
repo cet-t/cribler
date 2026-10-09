@@ -114,6 +114,29 @@ impl<'a> NistSuite<'a> {
         Ok(self)
     }
 
+    /// Registers a `urng_core::Rng` generator `R`, built by `make` from this
+    /// suite's seed (truncated to `R::Word`), as a named test case (case name =
+    /// `R`'s type name). `urng_core` has no seeding trait, so any generator
+    /// works: `.from_urng_core(|seed| MyRng::new(seed))`; feature `urng_core`.
+    #[cfg(feature = "urng_core")]
+    pub fn from_urng_core<R, F>(mut self, make: F) -> Result<Self, NistError>
+    where
+        R: urng_core::Rng + 'a,
+        R::Word: crate::urng_core_support::CoreWord,
+        F: Fn(R::Word) -> R,
+    {
+        use crate::urng_core_support::CoreWord as _;
+        let mut rng = make(<R::Word as crate::urng_core_support::CoreWord>::from_seed(
+            self.seed,
+        ));
+        self.add_sampler(
+            crate::short_type_name::<R>(),
+            <R::Word as crate::urng_core_support::CoreWord>::BITS,
+            move || rng.nextu().to_u64(),
+        )?;
+        Ok(self)
+    }
+
     /// Registers a `rand_core::Rng` generator `R` seeded via
     /// `SeedableRng::seed_from_u64` from this suite's seed, as a named test
     /// case (case name = `R`'s type name; `word_bits` = 64). No instance to

@@ -56,7 +56,11 @@ pub struct WordSource<'a> {
 }
 
 impl<'a> WordSource<'a> {
-    pub fn new(name: impl Into<String>, word_bits: u32, sampler: impl FnMut() -> u64 + 'a) -> Self {
+    pub fn new<S, F>(name: S, word_bits: u32, sampler: F) -> Self
+    where
+        S: Into<String>,
+        F: FnMut() -> u64 + 'a,
+    {
         Self {
             name: name.into(),
             word_bits,
@@ -66,12 +70,19 @@ impl<'a> WordSource<'a> {
 }
 
 #[cfg(feature = "urng")]
-pub trait UrngSeed<W: urng::Word>: urng::Rng<Word = W> + Sized {
+pub trait UrngSeed<W>: urng::Rng<Word = W> + Sized
+where
+    W: urng::Word,
+{
     fn from_seed(seed: W) -> Self;
 }
 
 #[cfg(feature = "urng")]
-impl<W: urng::Word, R: urng::Rng<Word = W> + urng::Seed<Seed = W>> UrngSeed<W> for R {
+impl<W, R> UrngSeed<W> for R
+where
+    W: urng::Word,
+    R: urng::Rng<Word = W> + urng::Seed<Seed = W>,
+{
     fn from_seed(seed: W) -> Self {
         <Self as urng::Seed>::from_seed(seed)
     }

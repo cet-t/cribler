@@ -11,6 +11,8 @@ pub mod paranoid_suite;
 pub mod rand_support;
 pub mod source;
 pub mod suite;
+#[cfg(feature = "urng_core")]
+pub mod urng_core_support;
 #[cfg(feature = "urng")]
 pub mod urng_support;
 
@@ -41,5 +43,7 @@ pub use suite::{
     BirthdaySuite, ChiSqSuite, KsSuite, McPiSuite, NistSuite, RunsSuite, SerialSuite, Suite,
     SuiteError, SuiteResults,
 };
+#[cfg(feature = "urng_core")]
+pub use urng_core_support::{CoreTest, UrngCore};
 #[cfg(feature = "urng")]
 pub use urng_support::*;
